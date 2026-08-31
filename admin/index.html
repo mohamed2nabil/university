@@ -94,17 +94,17 @@
         // Multiple terms for the same student
         const defaultData = [
             {
-                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu', id: '121140',
+                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu.eg', id: '121140',
                 term: 'Summer Oral&Dental 2026',
                 grades: [ { material: 'General Anatomy (GMS 112)', grade: 'B-' } ]
             },
             {
-                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu', id: '121140',
+                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu.eg', id: '121140',
                 term: '2026 -SPRING -Oral and Dental Medicine',
                 grades: [ { material: 'General histology (GMS 113)', grade: 'F' } ]
             },
             {
-                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu', id: '121140',
+                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu.eg', id: '121140',
                 term: 'oral & dental fall 2025',
                 grades: [
                     { material: 'General Anatomy (GMS 112)', grade: 'B-' },
@@ -155,7 +155,7 @@
 
             const newStudent = {
                 name: document.getElementById('student-name').value,
-                email: document.getElementById('student-email').value,
+                email: document.getElementById('student-email').value.toLowerCase(),
                 id: document.getElementById('student-id').value,
                 term: document.getElementById('student-term').value,
                 grades: grades

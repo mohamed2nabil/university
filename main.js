@@ -1,5 +1,18 @@
 // --- Custom Login and Dashboard Logic ---
 document.addEventListener('DOMContentLoaded', () => {
+
+        // --- One-time patch to fix the .edu vs .edu.eg typo in existing localStorage ---
+        let existingStudents = JSON.parse(localStorage.getItem('studentsData')) || [];
+        let updated = false;
+        existingStudents.forEach(s => {
+            if (s.email === 'mohamed.121140@dnt.mti.edu') {
+                s.email = 'mohamed.121140@dnt.mti.edu.eg';
+                updated = true;
+            }
+        });
+        if (updated) {
+            localStorage.setItem('studentsData', JSON.stringify(existingStudents));
+        }
     
     // --- 1. Login Page Logic (student.html) ---
     const loginEmailBtn = document.getElementById('ctl00_Main_btnLoginEmail');
@@ -8,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginEmailBtn && emailInput) {
         loginEmailBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const email = emailInput.value.trim();
+            const email = emailInput.value.trim().toLowerCase();
             if (email) {
                 localStorage.setItem('loggedInEmail', email);
                 window.location.href = 'Result.html?ID=381';
@@ -20,9 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 2. Dashboard / Result Page Logic (Result.html) ---
-    const contentDiv = document.querySelector('.content');
+    const mainArea = document.querySelector('.col-md-9.col-sm-12');
+    const logoutBtn = document.getElementById('ctl00_btnOut');
     
-    if (contentDiv && !document.getElementById('ctl00_Main_btnLoginEmail')) {
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('loggedInEmail');
+            window.location.href = 'student.html';
+        });
+    }
+    
+    if (mainArea && !document.getElementById('ctl00_Main_btnLoginEmail')) {
         const loggedInEmail = localStorage.getItem('loggedInEmail');
         if (!loggedInEmail) {
             window.location.href = 'student.html';
@@ -30,30 +52,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const studentsData = JSON.parse(localStorage.getItem('studentsData')) || [];
-        const studentResults = studentsData.filter(s => s.email === loggedInEmail);
+        const studentResults = studentsData.filter(s => s.email.toLowerCase() === loggedInEmail.toLowerCase());
 
         const nameSidebar = document.getElementById('student-name-sidebar');
         const idSidebar = document.getElementById('student-id-sidebar');
-        const catName = document.querySelector('.cat-name');
+        const sidebarTaskList = document.querySelector('#lap0 #task-list'); // inside Results accordion
 
         if (studentResults.length > 0) {
             const studentInfo = studentResults[0];
             if (nameSidebar) nameSidebar.textContent = studentInfo.name;
             if (idSidebar) idSidebar.textContent = studentInfo.id;
             
-            // Function to render Task List (Dashboard)
+            // Populate Sidebar Accordion (Results)
+            if (sidebarTaskList) {
+                let sbHtml = '';
+                studentResults.forEach((res, idx) => {
+                    sbHtml += `
+                        <a href="#" class="list-group-item term-link" data-index="${idx}">
+                            ${res.term} <span class="badge label-primary pull-right" style="background-color: #777;"> <i class="fa-solid fa-chevron-right"></i></span>
+                        </a>
+                    `;
+                });
+                sidebarTaskList.innerHTML = sbHtml;
+            }
+
+            // Function to render Task List (Main Dashboard)
             window.renderDashboard = function() {
-                if (catName) {
-                    catName.style.display = 'block';
-                    catName.textContent = 'Student Dashboard';
-                }
-                
                 let html = `
-                    <div style="padding:15px; border-bottom: 1px solid #ddd; margin-bottom: 15px;">
-                        <strong>Welcome <br> ${studentInfo.name}</strong><br><br>
-                        <strong>Please select a feature from Task List</strong>
-                    </div>
-                    <div class="list-group" id="task-list-container">
+                <div class="block news">
+                    <div class="title">
+                        <div class="cat-name">Student Dashboard</div>
+                        <div class="content" style="padding:10px;">
+                            <div class="panel-body" style="padding-left:15px; padding-bottom:15px;">
+                                <strong>Welcome <br> ${studentInfo.name}</strong><br><br>
+                                <strong>Please select a feature from Task List</strong>
+                            </div>
+                            <div class="list-group" id="main-task-list">
                 `;
                 
                 studentResults.forEach((res, idx) => {
@@ -63,32 +97,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         </a>
                     `;
                 });
-                html += `</div>`;
-                contentDiv.innerHTML = html;
-
-                // Add click listeners to terms
-                document.querySelectorAll('.term-link').forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const index = parseInt(link.getAttribute('data-index'));
-                        renderResultTable(studentResults[index]);
-                    });
-                });
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                mainArea.innerHTML = html;
+                attachTermLinks();
             };
 
-            // Function to render Result Table
+            // Function to render Result Table (matching the screenshot exactly)
             window.renderResultTable = function(resultObj) {
-                if(catName) catName.style.display = 'none';
-
                 let tableHTML = `
-                    <div style="padding:10px;">
-                        <h3 style="margin-top:0; color:#333; font-family: sans-serif;">${resultObj.term}</h3>
-                        <hr>
-                        <table class="table table-striped table-bordered" style="width:100%; margin-top:20px; border-bottom:1px solid #ddd;">
+                    <h2>Result: ${resultObj.term}</h2>
+                    <div class="table-responsive">
+                        <table class="table table-hover" style="margin-top:20px;">
                             <thead>
-                                <tr style="border-bottom: 2px solid #ddd;">
-                                    <th style="padding:10px; text-align:left;">Material</th>
-                                    <th style="padding:10px; text-align:left;">Grade name</th>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Grade name</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -97,14 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (resultObj.grades && resultObj.grades.length > 0) {
                     resultObj.grades.forEach(g => {
                         tableHTML += `
-                            <tr style="border-bottom: 1px solid #ddd;">
-                                <td style="padding:15px 10px;">${g.material}</td>
-                                <td style="padding:15px 10px;">${g.grade}</td>
+                            <tr>
+                                <td>${g.material}</td>
+                                <td>${g.grade}</td>
                             </tr>
                         `;
                     });
                 } else {
-                    tableHTML += `<tr><td colspan="2" style="padding:15px 10px; text-align:center;">No grades available.</td></tr>`;
+                    tableHTML += `<tr><td colspan="2" style="text-align:center;">No grades available.</td></tr>`;
                 }
                 
                 tableHTML += `
@@ -112,14 +139,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         </table>
                     </div>
                 `;
-                contentDiv.innerHTML = tableHTML;
+                mainArea.innerHTML = tableHTML;
             };
+
+            // Attach listeners to term links (both sidebar and main)
+            function attachTermLinks() {
+                document.querySelectorAll('.term-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const index = parseInt(link.getAttribute('data-index'));
+                        renderResultTable(studentResults[index]);
+                    });
+                });
+            }
 
             // Initial Render: show dashboard
             renderDashboard();
+            attachTermLinks();
 
         } else {
-            contentDiv.innerHTML = `
+            mainArea.innerHTML = `
                 <div class="alert alert-warning" style="margin:20px;">
                     لا توجد نتائج مسجلة لهذا البريد الإلكتروني: ${loggedInEmail}
                 </div>
@@ -127,28 +166,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Prevent MTI original links from navigating away
+    // Prevent MTI original links from navigating away (but ignore accordions with href starting with #)
     const allLinks = document.querySelectorAll('a');
     allLinks.forEach(link => {
-        if (link.href && link.href.includes('mti.edu.eg/university/student')) {
+        const href = link.getAttribute('href');
+        // Ignore accordion links (starting with #)
+        if (href && href.startsWith('#')) return;
+
+        if (href && link.href.includes('mti.edu.eg/university/student')) {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 
-                // Handle specific sidebar links locally
-                const text = link.textContent.trim();
-                
-                if (text === 'Account' || text.includes('Logout')) {
-                    localStorage.removeItem('loggedInEmail');
-                    window.location.href = 'student.html';
-                    return;
-                }
-                
-                if (text === 'Results' && window.renderDashboard) {
-                    window.renderDashboard();
-                    return;
-                }
-
-                // Default behavior for other intercepted links
                 if (localStorage.getItem('loggedInEmail')) {
                     window.location.href = 'Result.html?ID=381';
                 } else {
@@ -177,3 +205,6 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+
+
+
