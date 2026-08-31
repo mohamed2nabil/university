@@ -1,18 +1,74 @@
 // --- Custom Login and Dashboard Logic ---
 document.addEventListener('DOMContentLoaded', () => {
 
-        // --- One-time patch to fix the .edu vs .edu.eg typo in existing localStorage ---
-        let existingStudents = JSON.parse(localStorage.getItem('studentsData')) || [];
+    const defaultData = [
+        {
+            name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu.eg', id: '121140',
+            term: 'Summer Oral&Dental 2026',
+            grades: [ 
+                { material: 'General histology (GMS 113)', grade: 'C' },
+                { material: 'Bio Chemistry 2 (GMS 121)', grade: 'B-' },
+                { material: 'Dental Anatomy (DA 111)', grade: 'C' }
+            ]
+        },
+        {
+            name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu.eg', id: '121140',
+            term: '2026 -SPRING -Oral and Dental Medicine',
+            grades: [ { material: 'General histology (GMS 113)', grade: 'F' } ]
+        },
+        {
+            name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu.eg', id: '121140',
+            term: 'oral & dental fall 2025',
+            grades: [
+                { material: 'General Anatomy (GMS 112)', grade: 'B-' },
+                { material: 'General histology (GMS 113)', grade: 'F' },
+                { material: 'Bio Chemistry (GMS 111)', grade: 'F' },
+                { material: 'Computer (CSC 111)', grade: 'C-' },
+                { material: 'Dental Anatomy (DA 111)', grade: 'F' },
+                { material: 'English (ENG 111)', grade: 'D' },
+                { material: 'Physiology (GMS 114)', grade: 'C' }
+            ]
+        }
+    ];
+
+    // Check existing data
+    let existingStudents = JSON.parse(localStorage.getItem('studentsData'));
+    
+    // If NO data at all (like visiting on github pages for the first time), set default data
+    if (!existingStudents || existingStudents.length === 0) {
+        existingStudents = defaultData;
+        localStorage.setItem('studentsData', JSON.stringify(existingStudents));
+    } else {
+        // Migration to fix typo and update specific grades automatically for existing users
         let updated = false;
         existingStudents.forEach(s => {
+            // Fix email typo
             if (s.email === 'mohamed.121140@dnt.mti.edu') {
                 s.email = 'mohamed.121140@dnt.mti.edu.eg';
                 updated = true;
+            }
+            // Update grades for Summer term from F to C if they haven't been edited
+            if (s.term === 'Summer Oral&Dental 2026') {
+                s.grades.forEach(g => {
+                    if (g.material.includes('GMS 113') && g.grade === 'F') { g.grade = 'C'; updated = true; }
+                    if (g.material.includes('DA 111') && g.grade === 'F') { g.grade = 'C'; updated = true; }
+                });
+                
+                // Add the missing Bio Chemistry 2 if it's the very old default that only had one grade
+                if (s.grades.length === 1 && s.grades[0].material.includes('GMS 112')) {
+                    s.grades = [ 
+                        { material: 'General histology (GMS 113)', grade: 'C' },
+                        { material: 'Bio Chemistry 2 (GMS 121)', grade: 'B-' },
+                        { material: 'Dental Anatomy (DA 111)', grade: 'C' }
+                    ];
+                    updated = true;
+                }
             }
         });
         if (updated) {
             localStorage.setItem('studentsData', JSON.stringify(existingStudents));
         }
+    }
     
     // --- 1. Login Page Logic (student.html) ---
     const loginEmailBtn = document.getElementById('ctl00_Main_btnLoginEmail');
@@ -205,6 +261,3 @@ document.addEventListener('click', function(e) {
         }
     }
 });
-
-
-
