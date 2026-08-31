@@ -1,0 +1,178 @@
+﻿
+var vslider = $('.slider-v').data('royalSlider');
+
+
+$(document).ready(function (e) {
+
+    try{
+    mapp = new GMaps({
+        div: '#map2',
+        lat: 30.033352,
+        lng: 31.283290
+    });
+
+
+    mapp.addMarker({
+        lat: 30.033352,
+        lng: 31.283290,
+        icon: "images/icn.png"
+
+
+    });
+}catch(exp){}
+
+
+
+
+    try{
+
+    $('.break-marq').simplemarquee({
+        speed: 80,
+        direction: 'left',
+        handleResize: true,
+        cycles: 100,
+        space: 0,
+        delayBetweenCycles: 1000,
+
+    });
+}catch(exp){}
+
+
+
+    try{
+
+    $('.slider-h').royalSlider({
+        arrowsNav: true,
+        fadeinLoadedSlide: true,
+        controlNavigationSpacing: 0,
+        controlNavigation: 'thumbnails',
+        thumbs: {
+            autoCenter: true,
+            fitInViewport: true,
+            orientation: 'horizontal',
+            spacing: 5,
+            paddingBottom: 0
+        },
+        keyboardNavEnabled: true,
+        imageScaleMode: 'none',
+        imageAlignCenter: false,
+        imageScalePadding: 0,
+        slidesSpacing: 0,
+        loop: true,
+        loopRewind: true,
+        numImagesToPreload: 3,
+        video: {
+            autoHideArrows: true,
+            autoHideControlNav: false,
+            autoHideBlocks: true
+        },
+        autoScaleSlider: false,
+        //autoScaleSliderWidth: 750,     
+        //autoScaleSliderHeight:702,
+
+        autoHeight: true,
+
+
+        /* size of all images http://help.dimsemenov.com/kb/royalslider-jquery-plugin-faq/adding-width-and-height-properties-to-images */
+        /* imgWidth: 362,
+        imgHeight: 204
+        */
+    });
+
+}catch(exp){}
+    try{
+
+    $('.slider-v').royalSlider({
+        arrowsNav: true,
+        fadeinLoadedSlide: true,
+        controlNavigationSpacing: 0,
+        controlNavigation: 'thumbnails',
+        thumbs: {
+            autoCenter: true,
+            fitInViewport: true,
+            orientation: 'vertical',
+            spacing: 1,
+            paddingBottom: 0
+        },
+        keyboardNavEnabled: true,
+        imageScaleMode: 'none',
+        imageAlignCenter: false,
+        imageScalePadding: 0,
+        slidesSpacing: 0,
+        loop: true,
+        loopRewind: true,
+        numImagesToPreload: 3,
+        video: {
+            autoHideArrows: true,
+            autoHideControlNav: false,
+            autoHideBlocks: true
+        },
+        autoScaleSlider: false,
+        //autoScaleSliderWidth: 750,     
+        //autoScaleSliderHeight:702,
+
+        autoHeight: true,
+
+
+        /* size of all images http://help.dimsemenov.com/kb/royalslider-jquery-plugin-faq/adding-width-and-height-properties-to-images */
+        /* imgWidth: 362,
+        imgHeight: 204
+        */
+    });
+}catch(exp){}
+
+    $(window).resize(function () {
+        if (($(window).width() <= 767)) {
+
+            //	 vslider.setThumbsOrientation('horizontal');
+            vslider.updateThumbsSize();
+        }
+
+    });
+    if (($(window).width() <= 767)) {
+
+        // vslider.setThumbsOrientation('horizontal');
+        vslider.updateThumbsSize();
+    }
+
+});
+
+
+
+
+
+$(".break  ").sticky({ topSpacing: 0 });
+
+
+$(document).ready(function () {
+
+
+
+      try{
+    var ajxu=(window.evid && (window.evid!=null) && (window.evid>0)?"/service/ev.aspx?id="+evid:"/service/ev.aspx");
+
+
+    $("#my-calendar").zabuto_calendar({
+        today: true,
+        show_days: true,
+        weekstartson: 0,
+        nav_icon: {
+            prev: '<i class="fa fa-chevron-circle-left"></i>',
+            next: '<i class="fa fa-chevron-circle-right"></i>'
+        },
+        ajax: {
+            url:ajxu,
+            modal: true
+        }
+
+        /*cell_border: true,
+      today: true,
+      show_days: false,
+      weekstartson: 0,
+      nav_icon: {
+          prev: '<i class="fa fa-chevron-circle-left"></i>',
+          next: '<i class="fa fa-chevron-circle-right"></i>'
+      }*/
+    });
+    }catch(exp){}
+});

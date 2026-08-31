@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - لوحة التحكم</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; display: none; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #174daf; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        textarea { resize: vertical; height: 150px; direction: ltr; text-align: left; font-family: monospace; }
+        button { background: #174daf; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #123c8a; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 12px; text-align: right; }
+        th { background-color: #f8f9fa; }
+        .btn { padding: 5px 10px; font-size: 14px; border: none; border-radius: 3px; cursor: pointer; color: white; margin-left: 5px; }
+        .delete-btn { background: #da2127; }
+        .delete-btn:hover { background: #a8171d; }
+        .edit-btn { background: #28a745; }
+        .edit-btn:hover { background: #218838; }
+        .help-text { font-size: 12px; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>لوحة تحكم النتائج (Admin)</h1>
+    <form id="admin-form">
+        <input type="hidden" id="edit-index" value="-1">
+        <div class="form-group">
+            <label>الاسم (Student Name):</label>
+            <input type="text" id="student-name" required>
+        </div>
+        <div class="form-group">
+            <label>البريد الإلكتروني (Email):</label>
+            <input type="email" id="student-email" required>
+        </div>
+        <div class="form-group">
+            <label>رقم الطالب (ID):</label>
+            <input type="text" id="student-id" required>
+        </div>
+        <div class="form-group">
+            <label>اسم النتيجة / الترم (Result/Term Title):</label>
+            <input type="text" id="student-term" placeholder="مثال: Result: oral & dental fall 2025" required>
+        </div>
+        <div class="form-group">
+            <label>المواد والدرجات (Grades):</label>
+            <textarea id="student-grades" placeholder="مثال:&#10;General Anatomy (GMS 112) = B-&#10;General histology (GMS 113) = F" required></textarea>
+            <div class="help-text">اكتب كل مادة في سطر جديد واستخدم علامة = بين اسم المادة والدرجة.</div>
+        </div>
+        <button type="submit" id="submit-btn">إضافة نتيجة جديدة</button>
+        <button type="button" id="cancel-btn" style="display:none; background:#6c757d;" onclick="cancelEdit()">إلغاء التعديل</button>
+    </form>
+
+    <table id="students-table">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الإيميل</th>
+                <th>الترم (النتيجة)</th>
+                <th>إجراء</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic rows will appear here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const pass = prompt('الرجاء إدخال كلمة المرور لدخول لوحة التحكم:');
+    if (pass === '1234567') {
+        document.body.style.display = 'block';
+    } else {
+        alert('كلمة المرور خاطئة!');
+        window.location.href = '../student.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (pass !== '1234567') return;
+
+        const form = document.getElementById('admin-form');
+        const tableBody = document.querySelector('#students-table tbody');
+        const submitBtn = document.getElementById('submit-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const editIndexInput = document.getElementById('edit-index');
+
+        // Multiple terms for the same student
+        const defaultData = [
+            {
+                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu', id: '121140',
+                term: 'Summer Oral&Dental 2026',
+                grades: [ { material: 'General Anatomy (GMS 112)', grade: 'B-' } ]
+            },
+            {
+                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu', id: '121140',
+                term: '2026 -SPRING -Oral and Dental Medicine',
+                grades: [ { material: 'General histology (GMS 113)', grade: 'F' } ]
+            },
+            {
+                name: 'محمد عيد عبدالغنى الديب', email: 'mohamed.121140@dnt.mti.edu', id: '121140',
+                term: 'oral & dental fall 2025',
+                grades: [
+                    { material: 'General Anatomy (GMS 112)', grade: 'B-' },
+                    { material: 'General histology (GMS 113)', grade: 'F' },
+                    { material: 'Bio Chemistry (GMS 111)', grade: 'F' },
+                    { material: 'Computer (CSC 111)', grade: 'C-' },
+                    { material: 'Dental Anatomy (DA 111)', grade: 'F' },
+                    { material: 'English (ENG 111)', grade: 'D' },
+                    { material: 'Physiology (GMS 114)', grade: 'C' }
+                ]
+            }
+        ];
+
+        let students = JSON.parse(localStorage.getItem('studentsData'));
+        if (!students || students.length === 0) {
+            students = defaultData;
+            localStorage.setItem('studentsData', JSON.stringify(students));
+        }
+
+        function renderTable() {
+            tableBody.innerHTML = '';
+            students.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.term}</td>
+                    <td>
+                        <button class="btn edit-btn" onclick="editStudent(${index})"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn delete-btn" onclick="deleteStudent(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const gradesText = document.getElementById('student-grades').value;
+            const gradesList = gradesText.split('\n').filter(line => line.trim() !== '');
+            const grades = gradesList.map(line => {
+                const parts = line.split('=');
+                return {
+                    material: parts[0] ? parts[0].trim() : '',
+                    grade: parts[1] ? parts[1].trim() : ''
+                };
+            });
+
+            const newStudent = {
+                name: document.getElementById('student-name').value,
+                email: document.getElementById('student-email').value,
+                id: document.getElementById('student-id').value,
+                term: document.getElementById('student-term').value,
+                grades: grades
+            };
+
+            const idx = parseInt(editIndexInput.value);
+            if (idx >= 0) {
+                students[idx] = newStudent;
+                cancelEdit();
+            } else {
+                students.push(newStudent);
+            }
+
+            localStorage.setItem('studentsData', JSON.stringify(students));
+            form.reset();
+            renderTable();
+            alert('تم الحفظ بنجاح!');
+        });
+
+        window.deleteStudent = function(index) {
+            if (confirm('هل أنت متأكد من الحذف؟')) {
+                students.splice(index, 1);
+                localStorage.setItem('studentsData', JSON.stringify(students));
+                renderTable();
+            }
+        };
+
+        window.editStudent = function(index) {
+            const student = students[index];
+            document.getElementById('student-name').value = student.name;
+            document.getElementById('student-email').value = student.email;
+            document.getElementById('student-id').value = student.id;
+            document.getElementById('student-term').value = student.term;
+            
+            const gradesStr = student.grades.map(g => `${g.material} = ${g.grade}`).join('\n');
+            document.getElementById('student-grades').value = gradesStr;
+            
+            editIndexInput.value = index;
+            submitBtn.textContent = 'حفظ التعديلات';
+            cancelBtn.style.display = 'inline-block';
+            window.scrollTo(0, 0);
+        };
+
+        window.cancelEdit = function() {
+            form.reset();
+            editIndexInput.value = '-1';
+            submitBtn.textContent = 'إضافة نتيجة جديدة';
+            cancelBtn.style.display = 'none';
+        };
+
+        renderTable();
+    });
+</script>
+</body>
+</html>
