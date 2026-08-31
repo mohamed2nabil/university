@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>MTI University</title>
+    <script>
+        // Ponytail trick for GitHub Pages: 
+        // Catch 404 errors for the fake .aspx URLs and redirect them to the real .html files transparently.
+        const path = window.location.pathname.toLowerCase();
+        
+        if (path.includes('result.aspx')) {
+            window.location.replace('Result.html' + window.location.search + window.location.hash);
+        } else {
+            // Default fallback
+            window.location.replace('student.html');
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>
