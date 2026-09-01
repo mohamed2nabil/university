@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- 1. Login Page Logic (student.html) ---
+    // --- 1. Login Page Logic (index.html) ---
     const loginEmailBtn = document.getElementById('ctl00_Main_btnLoginEmail');
     const emailInput = document.getElementById('ctl00_Main_txtEmail');
 
@@ -96,14 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('loggedInEmail');
-            window.location.href = 'student.html';
+            window.location.href = 'index.html';
         });
     }
     
     if (mainArea && !document.getElementById('ctl00_Main_btnLoginEmail')) {
         const loggedInEmail = localStorage.getItem('loggedInEmail');
         if (!loggedInEmail) {
-            window.location.href = 'student.html';
+            window.location.href = 'index.html';
             return;
         }
 
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (localStorage.getItem('loggedInEmail')) {
                     window.location.href = 'Result.html?ID=381';
                 } else {
-                    window.location.href = 'student.html';
+                    window.location.href = 'index.html';
                 }
             });
         }
